@@ -1,0 +1,740 @@
+<!doctype html>
+<html>
+  <head>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: #0a0a0f;
+        color: #e8e6f0;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      .noise {
+        position: fixed;
+        inset: 0;
+        opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+      }
+      .wrap {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 48px 24px 80px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 64px;
+        position: relative;
+      }
+      .header::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(
+          ellipse,
+          rgba(139, 92, 246, 0.12) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: #7c6fa0;
+        margin-bottom: 16px;
+        font-weight: 500;
+      }
+      .name-tag {
+        display: inline-block;
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        padding: 6px 20px;
+        border-radius: 100px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 24px;
+        letter-spacing: 0.05em;
+      }
+      h1 {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(36px, 6vw, 64px);
+        font-weight: 900;
+        line-height: 1.05;
+        color: #fff;
+        margin-bottom: 12px;
+      }
+      h1 span {
+        background: linear-gradient(90deg, #a78bfa, #e879f9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .subtitle {
+        color: #9b8ab0;
+        font-size: 15px;
+        font-weight: 300;
+        letter-spacing: 0.02em;
+      }
+
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 2px;
+        background: #1a1625;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 48px;
+      }
+      .stat {
+        padding: 20px 16px;
+        background: #12101c;
+        text-align: center;
+        transition: background 0.2s;
+      }
+      .stat:hover {
+        background: #1a1625;
+      }
+      .stat-num {
+        font-family: "Playfair Display", serif;
+        font-size: 32px;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1;
+      }
+      .stat-num.accent {
+        background: linear-gradient(135deg, #a78bfa, #e879f9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .stat-label {
+        font-size: 11px;
+        color: #6b5d80;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-top: 6px;
+        font-weight: 500;
+      }
+
+      .attend-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px;
+        background: #1a1625;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-top: 16px;
+      }
+      .attend-item {
+        background: #12101c;
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .attend-item:hover {
+        background: #16131f;
+      }
+      .attend-key {
+        font-size: 13px;
+        color: #9b8ab0;
+        font-weight: 400;
+      }
+      .attend-val {
+        font-size: 13px;
+        font-weight: 600;
+        color: #e8e6f0;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .pill-ok {
+        background: rgba(34, 197, 94, 0.12);
+        color: #4ade80;
+      }
+      .pill-purple {
+        background: rgba(167, 139, 250, 0.12);
+        color: #a78bfa;
+      }
+      .late-note {
+        margin-top: 12px;
+        background: rgba(167, 139, 250, 0.06);
+        border: 1px solid rgba(167, 139, 250, 0.15);
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 12.5px;
+        color: #9b8ab0;
+        line-height: 1.6;
+      }
+      .late-note strong {
+        color: #c4b5fd;
+        font-weight: 500;
+      }
+
+      .section {
+        margin-bottom: 52px;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .section-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .section-title {
+        font-family: "Playfair Display", serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .proj-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+      .proj-card {
+        background: #12101c;
+        border: 1px solid #1e1a2e;
+        border-radius: 16px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+      .proj-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--c1), var(--c2));
+      }
+      .proj-card:hover {
+        border-color: #2d2845;
+        transform: translateY(-2px);
+      }
+      .proj-icon {
+        font-size: 22px;
+        margin-bottom: 12px;
+      }
+      .proj-card h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #e8e6f0;
+        margin-bottom: 8px;
+      }
+      .proj-card ul {
+        list-style: none;
+        padding: 0;
+      }
+      .proj-card ul li {
+        font-size: 12px;
+        color: #6b5d80;
+        padding: 3px 0;
+        padding-left: 12px;
+        position: relative;
+        line-height: 1.5;
+      }
+      .proj-card ul li::before {
+        content: "›";
+        position: absolute;
+        left: 0;
+        color: #7c3aed;
+        font-weight: 700;
+      }
+      .proj-card .badge {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 100px;
+        background: rgba(167, 139, 250, 0.15);
+        color: #c4b5fd;
+      }
+
+      .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .tag {
+        padding: 5px 12px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 500;
+        background: #1a1625;
+        border: 1px solid #2d2845;
+        color: #9b8ab0;
+        transition: all 0.2s;
+      }
+      .tag:hover {
+        background: #2d2845;
+        color: #c4b5fd;
+        border-color: #7c3aed;
+      }
+
+      .report-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 4px;
+      }
+      .rep-tag {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11.5px;
+        background: rgba(34, 197, 94, 0.06);
+        border: 1px solid rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        font-weight: 500;
+      }
+
+      .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+      }
+      .skill-item {
+        background: #12101c;
+        border: 1px solid #1e1a2e;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        transition: border-color 0.2s;
+      }
+      .skill-item:hover {
+        border-color: #2d2845;
+      }
+      .skill-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #a78bfa, #e879f9);
+        flex-shrink: 0;
+        margin-top: 5px;
+      }
+      .skill-text {
+        font-size: 13px;
+        color: #9b8ab0;
+        line-height: 1.5;
+      }
+      .skill-text strong {
+        display: block;
+        color: #e8e6f0;
+        font-weight: 500;
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+
+      .highlights {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+      }
+      .hl-item {
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.08),
+          rgba(168, 85, 247, 0.04)
+        );
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .hl-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #7c6fa0;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      .hl-val {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        font-family: "Playfair Display", serif;
+      }
+      .hl-desc {
+        font-size: 12px;
+        color: #6b5d80;
+        margin-top: 4px;
+        line-height: 1.4;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 64px;
+        padding-top: 32px;
+        border-top: 1px solid #1a1625;
+      }
+      .footer-name {
+        font-family: "Playfair Display", serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 4px;
+      }
+      .footer-role {
+        display: inline-block;
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        padding: 5px 18px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: 0.08em;
+        margin-bottom: 16px;
+      }
+      .footer p {
+        font-size: 13px;
+        color: #4a3f60;
+        line-height: 1.7;
+      }
+      .footer strong {
+        color: #7c6fa0;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="noise"></div>
+    <div class="wrap">
+      <div class="header">
+        <div class="eyebrow">Speakerbox · April 2026</div>
+        <div class="name-tag">Full Stack Engineer</div>
+        <h1>Monthly <span>Performance</span><br />Report</h1>
+        <p class="subtitle">
+          A full overview of contributions, deliverables & growth
+        </p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-num">25</div>
+          <div class="stat-label">Days Worked</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">6</div>
+          <div class="stat-label">WFH Days</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num accent">19.63</div>
+          <div class="stat-label">Overtime Hrs</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Pending Tasks</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">7+</div>
+          <div class="stat-label">Sites Delivered</div>
+        </div>
+      </div>
+
+      <!-- 1. Attendance -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-num">1</div>
+          <div class="section-title">Attendance Overview</div>
+        </div>
+        <div class="attend-grid">
+          <div class="attend-item">
+            <span class="attend-key">Total Working Days</span
+            ><span class="attend-val">26</span>
+          </div>
+          <div class="attend-item">
+            <span class="attend-key">Days Present</span
+            ><span class="attend-val"
+              >25 <span class="pill pill-ok">Full</span></span
+            >
+          </div>
+          <div class="attend-item">
+            <span class="attend-key">Work From Home</span
+            ><span class="attend-val">6 days</span>
+          </div>
+          <div class="attend-item">
+            <span class="attend-key">Total Overtime</span
+            ><span class="attend-val pill pill-purple">19.63 hrs</span>
+          </div>
+          <div class="attend-item">
+            <span class="attend-key">Late Out (8+ hrs)</span
+            ><span class="attend-val">18 days</span>
+          </div>
+          <div class="attend-item">
+            <span class="attend-key">Early Out</span
+            ><span class="attend-val">2 days</span>
+          </div>
+        </div>
+        <div class="late-note">
+          <strong>Late arrivals breakdown (all informed):</strong> Before 9:15 —
+          8 days &nbsp;·&nbsp; Before 9:30 — 2 days &nbsp;·&nbsp; Before 9:45 —
+          2 days (formally informed).<br />
+          None of these late arrivals impacted any project, deliverable, or team
+          workflow.
+        </div>
+      </div>
+
+      <!-- 2. Project Deliverables -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-num">2</div>
+          <div class="section-title">Project Deliverables</div>
+        </div>
+        <div class="proj-grid">
+          <div class="proj-card" style="--c1: #7c3aed; --c2: #a855f7">
+            <div class="proj-icon">🌐</div>
+            <h3>Website Development</h3>
+            <ul>
+              <li>Marshalway — end-to-end, directly handled client</li>
+              <li>
+                Bun Farsa — built & launched in just
+                <strong style="color: #c4b5fd">13 hrs</strong>, AI video loop,
+                domain connected
+              </li>
+              <li>
+                Cribbies — desktop + mobile completed in
+                <strong style="color: #c4b5fd">7 hrs</strong>
+              </li>
+              <li>Zoomlion — multilingual, new pages, career, quote page</li>
+              <li>Canola Cafe Digital Menu — built & hosted in 2.5 hrs</li>
+              <li>Sign Laban — multiple edit rounds + digital menu</li>
+              <li>Speakerbox — new page and video added</li>
+            </ul>
+          </div>
+
+          <div class="proj-card" style="--c1: #0ea5e9; --c2: #6366f1">
+            <div class="proj-icon">⚙️</div>
+            <h3>Creators Dashboard (Internal)</h3>
+            <ul>
+              <li>Contributed from project inception</li>
+              <li>Bug fixes, time-issue fixes, new features</li>
+              <li>Major edits and new page integrations</li>
+              <li>Fixed internal website downtime</li>
+              <li>Supported team with Vercel & GitHub</li>
+            </ul>
+          </div>
+
+          <div class="proj-card" style="--c1: #f43f5e; --c2: #ec4899">
+            <div class="proj-icon">🛒</div>
+            <h3>E-Commerce (F1rst Jersey)</h3>
+            <ul>
+              <li>Fixed home page trending error</li>
+              <li>Fixed checkout error</li>
+              <li>Order tracking management system</li>
+              <li>Voucher card system implementation</li>
+            </ul>
+          </div>
+
+          <div class="proj-card" style="--c1: #10b981; --c2: #06b6d4">
+            <div class="badge">~30 min each</div>
+            <div class="proj-icon">🎴</div>
+            <h3>Hello Cards</h3>
+            <div class="tag-cloud" style="margin-top: 8px">
+              <span class="tag">Knotntot</span><span class="tag">Kutsanmis</span
+              ><span class="tag">Heavenly Shack</span
+              ><span class="tag">Skylink</span
+              ><span class="tag">Skin in the Game</span
+              ><span class="tag">Kaazos</span><span class="tag">Goodwill</span
+              ><span class="tag">Cribbies</span><span class="tag">Baname</span
+              ><span class="tag">Beryanco</span
+              ><span class="tag">Rajadhani</span><span class="tag">Milan</span
+              ><span class="tag">Skill Town</span
+              ><span class="tag">Sign Laban</span
+              ><span class="tag">Relaxowave</span
+              ><span class="tag">Honey Museum</span
+              ><span class="tag">Coalspark</span
+              ><span class="tag">First Step</span>
+            </div>
+          </div>
+
+          <div
+            class="proj-card"
+            style="--c1: #f59e0b; --c2: #fbbf24; grid-column: 1/-1"
+          >
+            <div class="badge">1–10 min each</div>
+            <div class="proj-icon">📊</div>
+            <h3>Monthly Reports — 26 Clients</h3>
+            <div class="report-cloud" style="margin-top: 8px">
+              <span class="rep-tag">Farsa</span><span class="rep-tag">Casa</span
+              ><span class="rep-tag">Sign Group</span
+              ><span class="rep-tag">Cooba</span
+              ><span class="rep-tag">Bun Farsa</span
+              ><span class="rep-tag">Sign Laban</span
+              ><span class="rep-tag">Magik Owen</span
+              ><span class="rep-tag">Nirvithi</span
+              ><span class="rep-tag">RBD</span><span class="rep-tag">EFS</span
+              ><span class="rep-tag">Taza</span
+              ><span class="rep-tag">Erbsign</span
+              ><span class="rep-tag">Amcor</span
+              ><span class="rep-tag">Okareel</span
+              ><span class="rep-tag">Fishbae</span
+              ><span class="rep-tag">Clan</span
+              ><span class="rep-tag">Green Wave</span
+              ><span class="rep-tag">Chaaya Club</span
+              ><span class="rep-tag">Knotntot</span
+              ><span class="rep-tag">Cribbies</span
+              ><span class="rep-tag">Goodwill</span
+              ><span class="rep-tag">GOCS</span
+              ><span class="rep-tag">Vidya</span
+              ><span class="rep-tag">Skylink</span
+              ><span class="rep-tag">Kutsanmis</span
+              ><span class="rep-tag">Standard Bakes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Skills -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-num">3</div>
+          <div class="section-title">Skills & Professional Growth</div>
+        </div>
+        <div class="skills-grid">
+          <div class="skill-item">
+            <div class="skill-dot"></div>
+            <div class="skill-text">
+              <strong>Claude AI (Deep Dive)</strong>Studied Claude AI in depth
+              and actively implemented code using it in real projects — applied
+              across full development workflows
+            </div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-dot"></div>
+            <div class="skill-text">
+              <strong>AI Tools & Exploration</strong>Deepened AI knowledge,
+              explored Freepik AI image generator and multiple new AI tools
+            </div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-dot"></div>
+            <div class="skill-text">
+              <strong>DaVinci Resolve</strong>Learned basics; created and looped
+              an AI video used live on a client website
+            </div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-dot"></div>
+            <div class="skill-text">
+              <strong>Figma & MCP Servers</strong>Strengthened Figma skills;
+              integrated MCP server connection in Bun Farsa website
+            </div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-dot"></div>
+            <div class="skill-text">
+              <strong>Photoshop & Illustrator</strong>Expanded proficiency in
+              creative design tools
+            </div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-dot"></div>
+            <div class="skill-text">
+              <strong>Team Knowledge Sharing</strong>Introduced designers to CSS
+              Peeper and other browser extensions for efficient design
+              referencing
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Key Highlights -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-num">4</div>
+          <div class="section-title">Key Highlights</div>
+        </div>
+        <div class="highlights">
+          <div class="hl-item">
+            <div class="hl-title">Websites Delivered</div>
+            <div class="hl-val">7+</div>
+            <div class="hl-desc">Every site completed in record time</div>
+          </div>
+          <div class="hl-item">
+            <div class="hl-title">Pending Work</div>
+            <div class="hl-val">Zero</div>
+            <div class="hl-desc">All deliverables done before deadline</div>
+          </div>
+          <div class="hl-item">
+            <div class="hl-title">Overtime Logged</div>
+            <div class="hl-val">19.63 hrs</div>
+            <div class="hl-desc">18 days stayed beyond 8 hours</div>
+          </div>
+          <div class="hl-item">
+            <div class="hl-title">Bun Farsa Site</div>
+            <div class="hl-val">13 hrs</div>
+            <div class="hl-desc">
+              Full website built, launched & domain connected
+            </div>
+          </div>
+          <div class="hl-item">
+            <div class="hl-title">Cribbies Site</div>
+            <div class="hl-val">7 hrs</div>
+            <div class="hl-desc">Full desktop + mobile in a single day</div>
+          </div>
+          <div class="hl-item">
+            <div class="hl-title">Monthly Reports</div>
+            <div class="hl-val">1–10 min</div>
+            <div class="hl-desc">26 clients covered across the month</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer with name -->
+      <div class="footer">
+        <div class="footer-name">Muhammed Farooque</div>
+        <br />
+        <div class="footer-role">Full Stack Engineer</div>
+        <p>
+          <strong>Speakerbox · April 2026</strong><br />
+          All work completed with quality and within deadlines. Late arrivals
+          did not impact any project, deliverable, or team workflow.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
